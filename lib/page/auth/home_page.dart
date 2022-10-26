@@ -2,11 +2,15 @@ import 'package:d_chart/d_chart.dart';
 import 'package:d_view/d_view.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import 'package:moneyapp/config/app_asset.dart';
 import 'package:moneyapp/config/app_color.dart';
 import 'package:moneyapp/config/app_format.dart';
 import 'package:moneyapp/config/session.dart';
 import 'package:moneyapp/page/auth/history/add_history_page.dart';
+import 'package:moneyapp/page/auth/history/detail_history_page.dart';
+import 'package:moneyapp/page/auth/history/history_page.dart';
+import 'package:moneyapp/page/auth/history/income_outcome_page.dart';
 import 'package:moneyapp/page/auth/login_page.dart';
 import 'package:moneyapp/presentation/controller/c_home.dart';
 import 'package:moneyapp/presentation/controller/c_user.dart';
@@ -80,48 +84,53 @@ class _HomePageState extends State<HomePage> {
             ),
           ),
           Expanded(
-            child: ListView(
-              padding: const EdgeInsets.fromLTRB(20, 0, 20, 30),
-              children: [
-                const Text(
-                  'Pengeluaran hari ini',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
-                ),
-                const SizedBox(
-                  height: 16,
-                ),
-                cardToday(context),
-                SizedBox(
-                  height: 30,
-                ),
-                Center(
-                  child: Container(
-                    height: 8,
-                    width: 80,
-                    decoration: BoxDecoration(
-                      color: AppColor.bg,
-                      borderRadius: BorderRadius.circular(30),
+            child: RefreshIndicator(
+              onRefresh: (() async {
+                cHome.getAnalysis(cUser.data.idUser!);
+              }),
+              child: ListView(
+                padding: const EdgeInsets.fromLTRB(20, 0, 20, 30),
+                children: [
+                  const Text(
+                    'Pengeluaran hari ini',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+                  ),
+                  const SizedBox(
+                    height: 16,
+                  ),
+                  cardToday(context),
+                  SizedBox(
+                    height: 30,
+                  ),
+                  Center(
+                    child: Container(
+                      height: 8,
+                      width: 80,
+                      decoration: BoxDecoration(
+                        color: AppColor.bg,
+                        borderRadius: BorderRadius.circular(30),
+                      ),
                     ),
                   ),
-                ),
-                SizedBox(
-                  height: 30,
-                ),
-                const Text(
-                  'Pengeluaran hari ini',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
-                ),
-                DView.spaceHeight(30),
-                weekly(),
-                SizedBox(
-                  height: 30,
-                ),
-                const Text(
-                  'Perbandingan bulan ini',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
-                ),
-                monthly(context),
-              ],
+                  SizedBox(
+                    height: 30,
+                  ),
+                  const Text(
+                    'Pengeluaran hari ini',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+                  ),
+                  DView.spaceHeight(30),
+                  weekly(),
+                  SizedBox(
+                    height: 30,
+                  ),
+                  const Text(
+                    'Perbandingan bulan ini',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+                  ),
+                  monthly(context),
+                ],
+              ),
             ),
           ),
         ],
@@ -209,7 +218,9 @@ class _HomePageState extends State<HomePage> {
             height: 1,
           ),
           ListTile(
-            onTap: () {},
+            onTap: () {
+              Get.to(() => IncomeOutcomPage(type: "Pemasukan"));
+            },
             leading: Icon(Icons.south_west),
             horizontalTitleGap: 0,
             title: Text('Pemasukan'),
@@ -219,7 +230,11 @@ class _HomePageState extends State<HomePage> {
             height: 1,
           ),
           ListTile(
-            onTap: () {},
+            onTap: () {
+              Get.to(() => IncomeOutcomPage(
+                    type: 'Pengeluaran',
+                  ));
+            },
             leading: Icon(Icons.north_east),
             horizontalTitleGap: 0,
             title: Text('Pengeluaran'),
@@ -229,7 +244,9 @@ class _HomePageState extends State<HomePage> {
             height: 1,
           ),
           ListTile(
-            onTap: () {},
+            onTap: () {
+              Get.to(() => const HistoryPage());
+            },
             leading: Icon(Icons.history),
             horizontalTitleGap: 0,
             title: Text('Riwayat'),
@@ -386,27 +403,40 @@ class _HomePageState extends State<HomePage> {
               );
             }),
           ),
-          Container(
-            margin: const EdgeInsets.fromLTRB(16, 0, 0, 16),
-            padding: const EdgeInsets.symmetric(vertical: 6),
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(8),
-                bottomLeft: Radius.circular(8),
+          GestureDetector(
+            onTap: () {
+              Get.to(
+                () => DetailHistoryPage(
+                  iduser: cUser.data.idUser!,
+                  date: DateFormat('yyyy-MM-dd').format(
+                    DateTime.now(),
+                  ),
+                ),
+              );
+            },
+            child: Container(
+              margin: const EdgeInsets.fromLTRB(16, 0, 0, 16),
+              padding: const EdgeInsets.symmetric(vertical: 6),
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(8),
+                  bottomLeft: Radius.circular(8),
+                ),
               ),
+              child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: const [
+                    Text(
+                      'Selengkapnya',
+                      style: TextStyle(color: AppColor.primary, fontSize: 16),
+                    ),
+                    Icon(
+                      Icons.navigate_next,
+                      color: AppColor.primary,
+                    ),
+                  ]),
             ),
-            child:
-                Row(mainAxisAlignment: MainAxisAlignment.end, children: const [
-              Text(
-                'Selengkapnya',
-                style: TextStyle(color: AppColor.primary, fontSize: 16),
-              ),
-              Icon(
-                Icons.navigate_next,
-                color: AppColor.primary,
-              ),
-            ]),
           ),
         ],
       ),

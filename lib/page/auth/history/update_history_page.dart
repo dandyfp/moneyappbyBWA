@@ -10,26 +10,36 @@ import 'package:get/get.dart';
 import 'package:http/http.dart';
 import 'package:intl/intl.dart';
 import 'package:moneyapp/data/source/source_history.dart';
-import 'package:moneyapp/page/auth/controller_history/c_add_history.dart';
 import 'package:moneyapp/presentation/controller/c_user.dart';
 
 import '../../../config/app_color.dart';
 import '../../../config/app_format.dart';
+import '../controller_history/c_update_history.dart';
 
-class AddHistoryPage extends StatelessWidget {
-  AddHistoryPage({Key? key}) : super(key: key);
-  final cAddHistory = Get.put(CAddHistory());
+class UpdateHistoryPage extends StatefulWidget {
+  const UpdateHistoryPage(
+      {Key? key, required this.date, required this.idHistory})
+      : super(key: key);
+  final String date;
+  final String idHistory;
+  @override
+  State<UpdateHistoryPage> createState() => _UpdateHistoryPageState();
+}
+
+class _UpdateHistoryPageState extends State<UpdateHistoryPage> {
+  final cUpdateHistory = Get.put(CUpdateHistory());
   final controllerPrice = TextEditingController();
   final controllerName = TextEditingController();
   final cUser = Get.put(CUser());
 
-  addHistory() async {
-    bool success = await SourceHistory.add(
+  updateHistory() async {
+    bool success = await SourceHistory.update(
+      widget.idHistory,
       cUser.data.idUser!,
-      cAddHistory.date,
-      cAddHistory.type,
-      jsonEncode(cAddHistory.items),
-      cAddHistory.total.toString(),
+      cUpdateHistory.date,
+      cUpdateHistory.type,
+      jsonEncode(cUpdateHistory.items),
+      cUpdateHistory.total.toString(),
     );
 
     if (success) {
@@ -40,10 +50,17 @@ class AddHistoryPage extends StatelessWidget {
   }
 
   @override
+  void initState() {
+    cUpdateHistory.init(cUser.data.idUser, widget.date);
+    // TODO: implement initState
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
     var cHome;
     return Scaffold(
-      appBar: DView.appBarLeft('Tambah Baru'),
+      appBar: DView.appBarLeft('Update'),
       body: ListView(
         padding: EdgeInsets.all(16),
         children: [
@@ -54,7 +71,7 @@ class AddHistoryPage extends StatelessWidget {
           Row(
             children: [
               Obx(() {
-                return Text(cAddHistory.date);
+                return Text(cUpdateHistory.date);
               }),
               DView.spaceWidth(16),
               ElevatedButton.icon(
@@ -66,7 +83,7 @@ class AddHistoryPage extends StatelessWidget {
                     lastDate: DateTime(DateTime.now().year + 1),
                   );
                   if (result != null) {
-                    cAddHistory
+                    cUpdateHistory
                         .setDate(DateFormat('yyyy-MM-dd').format(result));
                   }
                 },
@@ -83,7 +100,7 @@ class AddHistoryPage extends StatelessWidget {
           DView.spaceHeight(8),
           Obx(() {
             return DropdownButtonFormField(
-              value: cAddHistory.type,
+              value: cUpdateHistory.type,
               items: ['Pemasukan', 'Pengeluaran'].map((e) {
                 return DropdownMenuItem(
                   value: e,
@@ -91,7 +108,7 @@ class AddHistoryPage extends StatelessWidget {
                 );
               }).toList(),
               onChanged: (value) {
-                cAddHistory.setType(value);
+                cUpdateHistory.setType(value);
               },
               decoration: const InputDecoration(
                 border: OutlineInputBorder(),
@@ -113,7 +130,7 @@ class AddHistoryPage extends StatelessWidget {
           DView.spaceHeight(),
           ElevatedButton(
             onPressed: () {
-              cAddHistory.addItem(
+              cUpdateHistory.addItem(
                 {'name': controllerName.text, 'price': controllerPrice.text},
               );
               controllerName.clear();
@@ -141,7 +158,7 @@ class AddHistoryPage extends StatelessWidget {
               border: Border.all(color: Colors.grey),
               borderRadius: BorderRadius.circular(8),
             ),
-            child: GetBuilder<CAddHistory>(builder: (_) {
+            child: GetBuilder<CUpdateHistory>(builder: (_) {
               return Wrap(
                 spacing: 8,
                 runSpacing: 0,
@@ -165,7 +182,7 @@ class AddHistoryPage extends StatelessWidget {
               DView.spaceWidth(8),
               Obx(() {
                 return Text(
-                  AppFormat.currency(cAddHistory.total.toString()),
+                  AppFormat.currency(cUpdateHistory.total.toString()),
                   style: Theme.of(context).textTheme.headline5!.copyWith(
                         fontWeight: FontWeight.bold,
                         color: AppColor.primary,
@@ -179,7 +196,7 @@ class AddHistoryPage extends StatelessWidget {
             color: AppColor.primary,
             borderRadius: BorderRadius.circular(8),
             child: InkWell(
-              onTap: () => addHistory(),
+              onTap: () => updateHistory(),
               child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 12),
                 child: Center(
