@@ -119,6 +119,7 @@ class _HistoryPageState extends State<HistoryPage> {
                   child: InkWell(
                     onTap: () {
                       Get.to(() => DetailHistoryPage(
+                            type: history.type!,
                             date: history.date!,
                             iduser: cUser.data.idUser!,
                           ));

@@ -407,6 +407,7 @@ class _HomePageState extends State<HomePage> {
             onTap: () {
               Get.to(
                 () => DetailHistoryPage(
+                  type: 'Pengeluaran',
                   iduser: cUser.data.idUser!,
                   date: DateFormat('yyyy-MM-dd').format(
                     DateTime.now(),
